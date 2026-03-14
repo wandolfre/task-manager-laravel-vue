@@ -82,7 +82,7 @@
 
       <!-- Footer Info -->
       <footer class="mt-8 text-center">
-        <p class="text-slate-500 dark:text-slate-600 text-xs">&copy; 2024 Task Manager. Secure cloud infrastructure.</p>
+        <p class="text-slate-500 dark:text-slate-600 text-xs">&copy; 2026 Task Manager. Secure cloud infrastructure.</p>
       </footer>
     </main>
   </div>

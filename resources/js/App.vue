@@ -43,7 +43,7 @@
 
     <!-- Footer — only on authenticated pages -->
     <footer v-if="isAuthenticated" class="mt-auto py-10 px-6 md:px-20 text-center text-slate-500 dark:text-slate-600 text-sm">
-      <p>&copy; 2024 Task Manager. All rights reserved.</p>
+      <p>&copy; 2026 Task Manager. All rights reserved.</p>
     </footer>
   </div>
 </template>
