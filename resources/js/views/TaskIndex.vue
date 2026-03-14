@@ -1,5 +1,32 @@
 <template>
   <div class="px-6 md:px-20 py-8 max-w-[1280px] mx-auto w-full">
+    <!-- Success Toast -->
+    <Transition name="fade">
+      <div v-if="successMessage" class="fixed top-4 right-4 z-50 bg-emerald-500/90 backdrop-blur-sm text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        {{ successMessage }}
+      </div>
+    </Transition>
+
+    <!-- Welcome & Stats -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-1">My Tasks</h1>
+      <p class="text-slate-500 dark:text-slate-400">
+        {{ taskStore.pagination.total || 0 }} total
+        <template v-if="taskStore.pagination.total > 0">
+          &middot; <span class="text-emerald-500">{{ completedCount }} completed</span>
+          &middot; <span class="text-amber-500">{{ pendingCount }} pending</span>
+        </template>
+      </p>
+      <!-- Progress Bar -->
+      <div v-if="taskStore.pagination.total > 0" class="mt-3 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden max-w-md">
+        <div
+          class="h-full bg-gradient-to-r from-[#2513ec] to-emerald-500 rounded-full transition-all duration-500"
+          :style="{ width: completionPercent + '%' }"
+        ></div>
+      </div>
+    </div>
+
     <!-- Filter Bar -->
     <div class="flex flex-col lg:flex-row gap-4 mb-8 items-end lg:items-center bg-white dark:bg-[#2513ec]/5 p-6 rounded-xl border border-slate-200 dark:border-[#2513ec]/10">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 w-full">
@@ -68,14 +95,15 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="taskStore.tasks.length === 0" class="text-center py-16">
-      <span class="material-symbols-outlined text-5xl text-slate-400 dark:text-slate-600 mb-4">inbox</span>
-      <p class="text-slate-500 dark:text-slate-400 text-lg mb-4">No tasks found</p>
-      <button
-        @click="openCreateModal"
-        class="text-[#2513ec] font-bold hover:underline"
-      >
-        Create your first task
+    <div v-else-if="taskStore.tasks.length === 0" class="text-center py-20">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#2513ec]/10 mb-6">
+        <span class="material-symbols-outlined text-5xl text-[#2513ec]">checklist</span>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-200 mb-2">All clear!</h3>
+      <p class="text-slate-500 mb-8 max-w-sm mx-auto">You don't have any tasks yet. Create one and start organizing your day.</p>
+      <button @click="openCreateModal" class="inline-flex items-center gap-2 bg-[#2513ec] text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#2513ec]/20">
+        <span class="material-symbols-outlined text-xl">add_circle</span>
+        Create Your First Task
       </button>
     </div>
 
@@ -84,7 +112,14 @@
       <div
         v-for="task in taskStore.tasks"
         :key="task.id"
-        class="bg-white dark:bg-[#121022]/40 border border-slate-200 dark:border-[#2513ec]/10 rounded-xl p-6 hover:border-[#2513ec]/40 transition-colors group"
+        :class="[
+          'bg-white dark:bg-[#121022]/40 border rounded-xl p-6 transition-all duration-200 group hover:shadow-lg hover:-translate-y-0.5',
+          task.completed
+            ? 'border-slate-200 dark:border-slate-800 opacity-75 hover:opacity-100'
+            : isOverdue(task.due_date)
+              ? 'border-red-500/30 hover:border-red-500/50 hover:shadow-red-500/10'
+              : 'border-slate-200 dark:border-[#2513ec]/10 hover:border-[#2513ec]/40 hover:shadow-[#2513ec]/10'
+        ]"
       >
         <div class="flex justify-between items-start mb-4">
           <div class="flex-1 min-w-0 mr-3">
@@ -102,21 +137,25 @@
             <p
               :class="[
                 'text-sm mt-1 line-clamp-2',
-                task.completed ? 'text-slate-400 dark:text-slate-500' : 'text-slate-500 dark:text-slate-400'
+                task.description
+                  ? (task.completed ? 'text-slate-400 dark:text-slate-500' : 'text-slate-500 dark:text-slate-400')
+                  : 'text-slate-400 dark:text-slate-600 italic'
               ]"
             >
-              {{ task.description }}
+              {{ task.description || 'No description' }}
             </p>
           </div>
           <div class="flex gap-1 shrink-0">
             <button
               @click="openEditModal(task)"
+              aria-label="Edit task"
               class="p-2 text-slate-400 hover:text-[#2513ec] hover:bg-[#2513ec]/10 rounded-lg transition-all"
             >
               <span class="material-symbols-outlined">edit</span>
             </button>
             <button
               @click="confirmDelete(task)"
+              aria-label="Delete task"
               class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
             >
               <span class="material-symbols-outlined">delete</span>
@@ -168,6 +207,7 @@
       <button
         :disabled="taskStore.pagination.currentPage <= 1"
         @click="fetchTasks(taskStore.pagination.currentPage - 1)"
+        aria-label="Previous page"
         class="flex size-10 items-center justify-center rounded-lg border border-slate-200 dark:border-[#2513ec]/20 text-slate-600 dark:text-slate-400 hover:bg-[#2513ec]/10 hover:text-[#2513ec] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <span class="material-symbols-outlined">chevron_left</span>
@@ -188,6 +228,7 @@
       <button
         :disabled="taskStore.pagination.currentPage >= taskStore.pagination.lastPage"
         @click="fetchTasks(taskStore.pagination.currentPage + 1)"
+        aria-label="Next page"
         class="flex size-10 items-center justify-center rounded-lg border border-slate-200 dark:border-[#2513ec]/20 text-slate-600 dark:text-slate-400 hover:bg-[#2513ec]/10 hover:text-[#2513ec] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <span class="material-symbols-outlined">chevron_right</span>
@@ -199,6 +240,8 @@
       v-if="showTaskModal"
       class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-[#121022]/60"
       @click.self="showTaskModal = false"
+      @keydown.escape="showTaskModal = false"
+      tabindex="-1"
     >
       <div class="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden">
         <!-- Modal Header -->
@@ -287,6 +330,8 @@
       v-if="showDeleteModal"
       class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-[#121022]/80"
       @click.self="showDeleteModal = false"
+      @keydown.escape="showDeleteModal = false"
+      tabindex="-1"
     >
       <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div class="p-6 text-center">
@@ -324,6 +369,21 @@ import { useTaskStore } from '../stores/tasks.js';
 
 const taskStore = useTaskStore();
 const loading = ref(false);
+const successMessage = ref('');
+
+// Task stats
+const completedCount = computed(() => taskStore.tasks.filter(t => t.completed).length);
+const pendingCount = computed(() => taskStore.tasks.filter(t => !t.completed).length);
+const completionPercent = computed(() => {
+  const total = taskStore.pagination.total;
+  if (!total) return 0;
+  return Math.round((completedCount.value / taskStore.tasks.length) * 100);
+});
+
+function showSuccess(msg) {
+  successMessage.value = msg;
+  setTimeout(() => { successMessage.value = ''; }, 3000);
+}
 
 // Delete modal state
 const showDeleteModal = ref(false);
@@ -406,8 +466,10 @@ async function handleSaveTask() {
       payload.description = taskForm.value.description || null;
       payload.due_date = taskForm.value.due_date || null;
       await taskStore.updateTask(editingTask.value.id, payload);
+      showSuccess('Task updated');
     } else {
       await taskStore.createTask(payload);
+      showSuccess('Task created');
     }
     showTaskModal.value = false;
     await fetchTasks(taskStore.pagination.currentPage);
@@ -417,8 +479,15 @@ async function handleSaveTask() {
 }
 
 async function toggleComplete(task) {
-  await taskStore.updateTask(task.id, { completed: !task.completed });
-  await fetchTasks(taskStore.pagination.currentPage);
+  try {
+    const newState = !task.completed;
+    await taskStore.updateTask(task.id, { completed: newState });
+    showSuccess(newState ? 'Task marked as complete' : 'Task marked as pending');
+    await fetchTasks(taskStore.pagination.currentPage);
+  } catch (error) {
+    showSuccess('');
+    console.error('Failed to toggle task:', error);
+  }
 }
 
 function confirmDelete(task) {
@@ -433,7 +502,10 @@ async function handleDelete() {
     await taskStore.deleteTask(taskToDelete.value.id);
     showDeleteModal.value = false;
     taskToDelete.value = null;
+    showSuccess('Task deleted');
     await fetchTasks(taskStore.pagination.currentPage);
+  } catch (error) {
+    console.error('Failed to delete task:', error);
   } finally {
     deleting.value = false;
   }

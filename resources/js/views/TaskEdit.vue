@@ -1,5 +1,13 @@
 <template>
   <div class="flex-grow flex items-center justify-center py-12 px-6">
+    <!-- Success Toast -->
+    <Transition name="fade">
+      <div v-if="successMessage" class="fixed top-4 right-4 z-50 bg-emerald-500/90 backdrop-blur-sm text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        {{ successMessage }}
+      </div>
+    </Transition>
+
     <!-- Loading -->
     <div v-if="loadingTask" class="text-center py-16 text-slate-500 dark:text-slate-400">
       <span class="material-symbols-outlined text-4xl mb-2 animate-spin">progress_activity</span>
@@ -29,7 +37,7 @@
       </div>
 
       <!-- Body -->
-      <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+      <form id="task-form" @submit.prevent="handleSubmit" class="p-6 space-y-6">
         <div class="space-y-2">
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
             Title <span class="text-red-500">*</span>
@@ -85,7 +93,8 @@
       <!-- Footer -->
       <div class="px-6 py-5 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row-reverse gap-3">
         <button
-          @click="handleSubmit"
+          type="submit"
+          form="task-form"
           :disabled="saving || !form.title.trim()"
           class="w-full sm:w-auto px-8 py-2.5 bg-[#2513ec] text-white font-semibold rounded-lg hover:bg-opacity-90 active:scale-95 transition-all shadow-lg shadow-[#2513ec]/20 disabled:opacity-50"
         >
@@ -124,6 +133,7 @@ const form = reactive({
 const loadingTask = ref(true);
 const saving = ref(false);
 const errorMessage = ref('');
+const successMessage = ref('');
 
 onMounted(async () => {
   try {
@@ -149,7 +159,8 @@ async function handleSubmit() {
       due_date: form.due_date || null,
       completed: form.completed,
     });
-    router.push({ name: 'tasks.index' });
+    successMessage.value = 'Task updated';
+    setTimeout(() => router.push({ name: 'tasks.index' }), 500);
   } catch (error) {
     if (error.response?.data?.errors) {
       errorMessage.value = Object.values(error.response.data.errors).flat().join(' ');

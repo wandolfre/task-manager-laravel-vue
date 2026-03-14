@@ -24,8 +24,8 @@
           <span class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ authStore.fullName }}</span>
           <span class="text-xs text-slate-500 dark:text-slate-400">User Account</span>
         </div>
-        <div class="h-10 w-10 rounded-full border-2 border-[#2513ec]/30 overflow-hidden bg-[#2513ec]/20 flex items-center justify-center">
-          <span class="material-symbols-outlined text-[#2513ec]">person</span>
+        <div class="h-10 w-10 rounded-full border-2 border-[#2513ec]/30 overflow-hidden bg-[#2513ec] flex items-center justify-center">
+          <span class="text-white font-bold text-sm">{{ authStore.userInitials }}</span>
         </div>
         <button
           @click="handleLogout"
@@ -66,3 +66,8 @@ async function handleLogout() {
   router.push({ name: 'login' });
 }
 </script>
+
+<style>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

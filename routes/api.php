@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Authentication (public)
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Authentication (public, rate-limited to 5 requests per minute)
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 // Protected routes — require a valid Sanctum API token
 Route::middleware('auth:sanctum')->group(function () {

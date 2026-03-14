@@ -30,21 +30,25 @@
         <form @submit.prevent="handleRegister" class="space-y-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-2">
-              <label class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">First Name</label>
+              <label for="first-name" class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">First Name</label>
               <input
+                id="first-name"
                 v-model="form.name"
                 type="text"
                 required
+                autocomplete="given-name"
                 class="w-full h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-[#2513ec] focus:border-transparent transition-all outline-none"
                 placeholder="John"
               />
             </div>
             <div class="space-y-2">
-              <label class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Last Name</label>
+              <label for="last-name" class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Last Name</label>
               <input
+                id="last-name"
                 v-model="form.last_name"
                 type="text"
                 required
+                autocomplete="family-name"
                 class="w-full h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-[#2513ec] focus:border-transparent transition-all outline-none"
                 placeholder="Doe"
               />
@@ -52,13 +56,15 @@
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Email Address</label>
+            <label for="email" class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Email Address</label>
             <div class="relative">
               <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">mail</span>
               <input
+                id="email"
                 v-model="form.email"
                 type="email"
                 required
+                autocomplete="email"
                 class="w-full h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-11 pr-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-[#2513ec] focus:border-transparent transition-all outline-none"
                 placeholder="name@example.com"
               />
@@ -66,28 +72,33 @@
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Password</label>
+            <label for="password" class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Password</label>
             <div class="relative">
               <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
               <input
+                id="password"
                 v-model="form.password"
                 type="password"
                 required
                 minlength="8"
+                autocomplete="new-password"
                 class="w-full h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-11 pr-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-[#2513ec] focus:border-transparent transition-all outline-none"
                 placeholder="••••••••"
               />
             </div>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 ml-1">Min 8 characters, uppercase, lowercase, and a number</p>
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Confirm Password</label>
+            <label for="password-confirmation" class="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Confirm Password</label>
             <div class="relative">
               <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock_reset</span>
               <input
+                id="password-confirmation"
                 v-model="form.password_confirmation"
                 type="password"
                 required
+                autocomplete="new-password"
                 class="w-full h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-11 pr-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-[#2513ec] focus:border-transparent transition-all outline-none"
                 placeholder="••••••••"
               />

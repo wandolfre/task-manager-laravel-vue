@@ -8,13 +8,13 @@ use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 /**
  * RESTful controller for Task CRUD operations.
  *
  * All endpoints are protected by auth:sanctum middleware.
- * Users can only access their own tasks — ownership is enforced
- * via abort(403) on every show/update/delete action.
+ * Ownership is enforced via TaskPolicy authorization.
  */
 class TaskController extends Controller
 {
@@ -34,22 +34,20 @@ class TaskController extends Controller
     {
         $query = $request->user()->tasks();
 
-        // Filter by completion status when the parameter is present
         if ($request->has('completed')) {
             $query->where('completed', filter_var($request->completed, FILTER_VALIDATE_BOOLEAN));
         }
 
-        // Filter by title using LIKE for partial/fuzzy matching
         if ($request->filled('title')) {
-            $query->where('title', 'like', '%' . $request->title . '%');
+            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $request->title);
+            $query->where('title', 'like', '%' . $escaped . '%');
         }
 
-        // Determine sort column — whitelist to prevent SQL injection via column name
+        // Whitelist to prevent SQL injection via column name
         $sortBy = in_array($request->sort_by, ['due_date', 'created_at'])
             ? $request->sort_by
             : 'created_at';
 
-        // Determine sort direction — whitelist to asc/desc only
         $sortOrder = in_array($request->sort_order, ['asc', 'desc'])
             ? $request->sort_order
             : 'desc';
@@ -67,12 +65,9 @@ class TaskController extends Controller
      * @param Task $task The task resolved via route model binding.
      * @return JsonResponse The task resource.
      */
-    public function show(Request $request, Task $task): JsonResponse
+    public function show(Task $task): JsonResponse
     {
-        // Ownership check — users must only access their own tasks
-        if ($task->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized');
-        }
+        $this->authorize('view', $task);
 
         return response()->json($task);
     }
@@ -90,7 +85,6 @@ class TaskController extends Controller
     {
         $task = $request->user()->tasks()->create($request->validated());
 
-        // Refresh to include default values (e.g. completed=false) in the response
         return response()->json($task->fresh(), 201);
     }
 
@@ -106,10 +100,7 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task): JsonResponse
     {
-        // Ownership check — users must only modify their own tasks
-        if ($task->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized');
-        }
+        $this->authorize('update', $task);
 
         $task->update($request->validated());
 
@@ -120,21 +111,17 @@ class TaskController extends Controller
      * Delete a task.
      *
      * Returns 403 if the authenticated user does not own the task.
-     * Uses soft-less permanent deletion (hard delete).
+     * Permanent deletion (no soft-delete).
      *
-     * @param Request $request The incoming authenticated HTTP request.
      * @param Task $task The task resolved via route model binding.
-     * @return JsonResponse Confirmation message (HTTP 200).
+     * @return Response Empty response (HTTP 204).
      */
-    public function destroy(Request $request, Task $task): JsonResponse
+    public function destroy(Task $task): Response
     {
-        // Ownership check — users must only delete their own tasks
-        if ($task->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized');
-        }
+        $this->authorize('delete', $task);
 
         $task->delete();
 
-        return response()->json(['message' => 'Task deleted successfully.']);
+        return response()->noContent();
     }
 }

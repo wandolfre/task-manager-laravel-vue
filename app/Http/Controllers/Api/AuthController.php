@@ -29,21 +29,17 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            // First name is required and capped at 255 chars for DB safety
             'name' => ['required', 'string', 'max:255'],
-            // Last name is required separately per project spec
             'last_name' => ['required', 'string', 'max:255'],
-            // Email must be unique to prevent duplicate accounts
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            // Password must be at least 8 chars and confirmed via password_confirmation field
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers(), 'confirmed'],
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
-            'password' => $validated['password'], // Hashed automatically via User model cast
+            'password' => $validated['password'],
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
@@ -100,7 +96,6 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        // Delete only the token used for this request, not all user tokens
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([

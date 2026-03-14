@@ -58,6 +58,11 @@ const routes = [
         meta: { requiresAuth: true },
         props: true,
     },
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'not-found',
+        redirect: { name: 'tasks.index' },
+    },
 ];
 
 const router = createRouter({
@@ -81,6 +86,18 @@ router.beforeEach((to, from, next) => {
     } else {
         next();
     }
+});
+
+router.afterEach((to) => {
+    const titles = {
+        'login': 'Sign In',
+        'register': 'Create Account',
+        'tasks.index': 'My Tasks',
+        'tasks.create': 'New Task',
+        'tasks.show': 'Task Details',
+        'tasks.edit': 'Edit Task',
+    };
+    document.title = `${titles[to.name] || 'Page'} — Task Manager`;
 });
 
 export default router;

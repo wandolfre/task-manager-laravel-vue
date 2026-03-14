@@ -1,5 +1,13 @@
 <template>
   <div class="flex-grow flex flex-col items-center justify-start py-12 px-6">
+    <!-- Success Toast -->
+    <Transition name="fade">
+      <div v-if="successMessage" class="fixed top-4 right-4 z-50 bg-emerald-500/90 backdrop-blur-sm text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        {{ successMessage }}
+      </div>
+    </Transition>
+
     <!-- Back Button -->
     <div class="w-full max-w-2xl mb-6">
       <router-link
@@ -17,8 +25,18 @@
       <p>Loading task...</p>
     </div>
 
+    <!-- Error State -->
+    <div v-else-if="!task" class="w-full max-w-2xl text-center py-16">
+      <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">error_outline</span>
+      <h3 class="text-xl font-semibold text-slate-300 mb-2">Task not found</h3>
+      <p class="text-slate-500 mb-6">The task you're looking for doesn't exist or was deleted.</p>
+      <router-link :to="{ name: 'tasks.index' }" class="bg-[#2513ec] text-white px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity inline-block">
+        Back to Tasks
+      </router-link>
+    </div>
+
     <!-- Task Detail Card -->
-    <div v-else-if="task" class="w-full max-w-2xl bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-[#2513ec]/10 shadow-xl overflow-hidden">
+    <div v-else class="w-full max-w-2xl bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-[#2513ec]/10 shadow-xl overflow-hidden">
       <div class="p-8">
         <div class="flex justify-between items-start mb-6">
           <div class="flex flex-col gap-3">
@@ -42,12 +60,14 @@
           <div class="flex items-center gap-2">
             <router-link
               :to="{ name: 'tasks.edit', params: { id: task.id } }"
+              aria-label="Edit task"
               class="p-2.5 rounded-lg bg-slate-100 dark:bg-[#2513ec]/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#2513ec]/20 transition-all border border-slate-200 dark:border-[#2513ec]/20"
             >
               <span class="material-symbols-outlined text-[20px]">edit</span>
             </router-link>
             <button
               @click="showDeleteModal = true"
+              aria-label="Delete task"
               class="p-2.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all border border-red-500/20"
             >
               <span class="material-symbols-outlined text-[20px]">delete</span>
@@ -57,11 +77,12 @@
 
         <div class="space-y-8">
           <!-- Description -->
-          <div v-if="task.description" class="space-y-4">
+          <div class="space-y-4">
             <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Description</h3>
-            <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-lg whitespace-pre-wrap">
+            <p v-if="task.description" class="text-slate-600 dark:text-slate-300 leading-relaxed text-lg whitespace-pre-wrap">
               {{ task.description }}
             </p>
+            <p v-else class="text-slate-400 dark:text-slate-600 italic">No description provided</p>
           </div>
 
           <!-- Metadata -->
@@ -101,6 +122,8 @@
       v-if="showDeleteModal"
       class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-[#121022]/80"
       @click.self="showDeleteModal = false"
+      @keydown.escape="showDeleteModal = false"
+      tabindex="-1"
     >
       <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div class="p-6 text-center">
@@ -146,6 +169,12 @@ const taskStore = useTaskStore();
 const task = ref(null);
 const loading = ref(true);
 const showDeleteModal = ref(false);
+const successMessage = ref('');
+
+function showSuccess(msg) {
+  successMessage.value = msg;
+  setTimeout(() => { successMessage.value = ''; }, 3000);
+}
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -157,13 +186,23 @@ function formatDate(dateStr) {
 }
 
 async function toggleComplete() {
-  await taskStore.updateTask(props.id, { completed: !task.value.completed });
-  task.value = await taskStore.fetchTask(props.id);
+  try {
+    const newState = !task.value.completed;
+    await taskStore.updateTask(props.id, { completed: newState });
+    task.value = await taskStore.fetchTask(props.id);
+    showSuccess(newState ? 'Task marked as complete' : 'Task marked as pending');
+  } catch (error) {
+    console.error('Failed to toggle task:', error);
+  }
 }
 
 async function handleDelete() {
-  await taskStore.deleteTask(props.id);
-  router.push({ name: 'tasks.index' });
+  try {
+    await taskStore.deleteTask(props.id);
+    router.push({ name: 'tasks.index' });
+  } catch (error) {
+    console.error('Failed to delete task:', error);
+  }
 }
 
 onMounted(async () => {

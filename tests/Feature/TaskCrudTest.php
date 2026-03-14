@@ -163,8 +163,7 @@ class TaskCrudTest extends TestCase
         $response = $this->withHeaders($this->authHeaders($user))
             ->deleteJson("/api/tasks/{$task->id}");
 
-        $response->assertOk()
-            ->assertJson(['message' => 'Task deleted successfully.']);
+        $response->assertNoContent();
 
         $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
     }

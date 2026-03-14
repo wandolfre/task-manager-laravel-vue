@@ -9,7 +9,7 @@ A full-stack Task Management application built with **Laravel 12** (REST API) an
 │                    Vue 3 SPA                         │
 │  ┌──────────┐  ┌──────────┐  ┌───────────────────┐  │
 │  │Vue Router│  │  Pinia   │  │ Axios (api.js)    │  │
-│  │(6 routes)│  │(2 stores)│  │ Bearer Token Auth │  │
+│  │(7 routes)│  │(2 stores)│  │ Bearer Token Auth │  │
 │  └──────────┘  └──────────┘  └─────────┬─────────┘  │
 └────────────────────────────────────────┬┘            │
                                          │ JSON/REST   │
@@ -26,7 +26,7 @@ A full-stack Task Management application built with **Laravel 12** (REST API) an
 └──────────────────────┬───────────────────────────────┘
                        │
               ┌────────▼────────┐
-              │   MySQL 8.0     │
+              │   MySQL 8.4     │
               │   (via Sail)    │
               └─────────────────┘
 ```
@@ -35,7 +35,7 @@ A full-stack Task Management application built with **Laravel 12** (REST API) an
 
 | Technology       | Version  |
 |------------------|----------|
-| PHP              | 8.2+     |
+| PHP              | 8.4+     |
 | Laravel          | 12.x     |
 | Laravel Sanctum  | 4.x      |
 | Vue.js           | 3.x      |
@@ -43,7 +43,7 @@ A full-stack Task Management application built with **Laravel 12** (REST API) an
 | Pinia            | 2.x      |
 | Tailwind CSS     | 4.x      |
 | Vite             | 7.x      |
-| MySQL            | 8.0      |
+| MySQL            | 8.4      |
 | PHPUnit          | 11.x     |
 | Docker (Sail)    | Latest   |
 | Node.js          | 20.x     |
@@ -59,7 +59,7 @@ A full-stack Task Management application built with **Laravel 12** (REST API) an
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/darient-test.git
+git clone <repository-url>  # Use the actual repo URL
 cd darient-test
 
 # 2. Copy environment file
@@ -154,6 +154,15 @@ The seeder creates **5 users** with **10 tasks each**. All seeded users have the
 | `sort_order`| string  | Sort direction: `asc`, `desc`        | `?sort_order=asc`    |
 | `page`      | integer | Pagination page number               | `?page=2`            |
 
+### Error Responses
+
+| Status | Description |
+|--------|-------------|
+| `401` | Missing or invalid authentication token |
+| `403` | Attempting to access another user's task |
+| `404` | Task not found |
+| `422` | Validation failed — response includes `errors` object with field-specific messages |
+
 ## Project Structure
 
 ```
@@ -178,7 +187,7 @@ database/
 resources/js/
 ├── api.js                          # Centralized Axios + Bearer token
 ├── App.vue                         # Root component with nav
-├── router/index.js                 # 6 named routes + auth guards
+├── router/index.js                 # 7 named routes + auth guards
 ├── stores/
 │   ├── auth.js                     # Token + user state (Pinia)
 │   └── tasks.js                    # Tasks + filters + pagination

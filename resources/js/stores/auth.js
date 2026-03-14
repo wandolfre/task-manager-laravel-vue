@@ -19,7 +19,15 @@ export const useAuthStore = defineStore('auth', () => {
     /** Full display name combining first and last name */
     const fullName = computed(() => {
         if (!user.value) return '';
-        return `${user.value.name} ${user.value.last_name}`;
+        return [user.value.name, user.value.last_name].filter(Boolean).join(' ');
+    });
+
+    /** User initials for avatar (e.g., "AP" for Andres Paz) */
+    const userInitials = computed(() => {
+        if (!user.value) return '';
+        const first = (user.value.name || '')[0] || '';
+        const last = (user.value.last_name || '')[0] || '';
+        return (first + last).toUpperCase();
     });
 
     /**
@@ -81,6 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
         user,
         isAuthenticated,
         fullName,
+        userInitials,
         register,
         login,
         logout,

@@ -30,14 +30,16 @@
         <form @submit.prevent="handleLogin" class="space-y-5">
           <!-- Email Input -->
           <div class="flex flex-col gap-2">
-            <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold flex items-center gap-2">
+            <label for="email" class="text-slate-700 dark:text-slate-300 text-sm font-semibold flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">mail</span>
               Email Address
             </label>
             <input
+              id="email"
               v-model="form.email"
               type="email"
               required
+              autocomplete="email"
               class="form-input w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 px-4 py-3 focus:ring-2 focus:ring-[#2513ec]/20 focus:border-[#2513ec] outline-none transition-all duration-200 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               placeholder="name@company.com"
             />
@@ -45,14 +47,16 @@
 
           <!-- Password Input -->
           <div class="flex flex-col gap-2">
-            <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold flex items-center gap-2">
+            <label for="password" class="text-slate-700 dark:text-slate-300 text-sm font-semibold flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">lock</span>
               Password
             </label>
             <input
+              id="password"
               v-model="form.password"
               type="password"
               required
+              autocomplete="current-password"
               class="form-input w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 px-4 py-3 focus:ring-2 focus:ring-[#2513ec]/20 focus:border-[#2513ec] outline-none transition-all duration-200 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               placeholder="••••••••"
             />
