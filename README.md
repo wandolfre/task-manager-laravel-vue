@@ -59,7 +59,7 @@ A full-stack Task Management application built with **Laravel 12** (REST API) an
 
 ```bash
 # 1. Clone the repository
-git clone <repository-url>  # Use the actual repo URL
+git clone https://github.com/wandolfre/task-manager-laravel-vue.git
 cd darient-test
 
 # 2. Copy environment file
@@ -208,6 +208,14 @@ tests/
     ├── TaskFilterTest.php              # Filter + sort tests
     └── TaskValidationTest.php          # 401 + 422 validation tests
 ```
+
+## Live Demo
+
+**Production URL:** [https://task-manager-laravel-vue.onrender.com](https://task-manager-laravel-vue.onrender.com)
+
+Deployed on Render using Docker containerization. The application supports MySQL, PostgreSQL, and SQLite through Laravel's database abstraction layer. For local development, Docker Compose (Laravel Sail) provides a MySQL 8.4 environment matching the production specification.
+
+> **Note:** Free-tier instances spin down after periods of inactivity. The first request may take ~30 seconds while the container starts up.
 
 ## Notes for Reviewers
 
